@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1"
+    />
+    <title>♡ Happy Birthday ♡</title>
+    <style>
+      :root {
+        --main: #b494b9;
+        --bg1: #f7effb;
+        --bg2: #b494b9;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        font-family: "Poppins", sans-serif;
+        background: radial-gradient(circle at center, var(--bg1) 0%, var(--bg2) 80%);
+        overflow: hidden;
+      }
+      #app {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        position: relative;
+      }
+      .footer {
+        position: absolute;
+        right: 20px;
+        bottom: 20px;
+        color: #fff;
+        text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+        font-size: 13px;
+      }
+      .link-btn {
+        position: absolute;
+        bottom: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10;
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(8px);
+        border: 2px solid rgba(255, 255, 255, 0.6);
+        color: #fff;
+        padding: 14px 30px;
+        border-radius: 40px;
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: 1px;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+        transition: all 0.3s ease;
+        text-decoration: none;
+      }
+      .link-btn:hover {
+        transform: translateX(-50%) translateY(-4px) scale(1.05);
+        background: rgba(255, 255, 255, 0.25);
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+      }
+    </style>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.154.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.154.0/examples/jsm/",
+          "gsap": "https://cdn.skypack.dev/gsap@3.12.2"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <a
+      href="https://zamj03.github.io/-/"
+      target="_blank"
+      class="link-btn"
+      id="visitBtn"
+      >♡ ~</a
+    >
+    <div class="footer">for my special person ~♡</div>
+
+    <script type="module">
+      import * as THREE from "three";
+      import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+      import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
+      import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+      import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+      import { FontLoader } from "three/addons/loaders/FontLoader.js";
+      import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
+      import { gsap } from "gsap";
+
+      const BALLOON_COLOR = 0xb494b9;
+      const BALLOON_COUNT = 50;
+
+      const container = document.getElementById("app");
+      const scene = new THREE.Scene();
+
+      const camera = new THREE.PerspectiveCamera(
+        55,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        2000
+      );
+      camera.position.set(0, 25, 65);
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setClearColor(0x000000, 0);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(window.devicePixelRatio);
+      container.appendChild(renderer.domElement);
+
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+
+      scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+      const dir = new THREE.DirectionalLight(0xffffff, 0.8);
+      dir.position.set(15, 40, 20);
+      scene.add(dir);
+
+      const composer = new EffectComposer(renderer);
+      composer.addPass(new RenderPass(scene, camera));
+      const bloom = new UnrealBloomPass(
+        new THREE.Vector2(window.innerWidth, window.innerHeight),
+        0.8,
+        0.4,
+        0.2
+      );
+      composer.addPass(bloom);
+
+      const loader = new FontLoader();
+      loader.load(
+        "https://threejs.org/examples/fonts/helvetiker_bold.typeface.json",
+        (font) => {
+          const textGeo = new TextGeometry("Happy Birthday > <", {
+            font,
+            size: 5,
+            height: 1,
+            curveSegments: 12,
+            bevelEnabled: true,
+            bevelThickness: 0.4,
+            bevelSize: 0.2,
+            bevelSegments: 3,
+          });
+
+          textGeo.computeBoundingBox();
+          const box = textGeo.boundingBox;
+          const centerX = -0.5 * (box.max.x - box.min.x);
+          const centerY = -0.5 * (box.max.y - box.min.y);
+          textGeo.translate(centerX, centerY, 0);
+
+          const mat = new THREE.MeshStandardMaterial({
+            color: 0xff66cc,
+            metalness: 0.5,
+            roughness: 0.2,
+            emissive: 0xff99cc,
+            emissiveIntensity: 0.4,
+          });
+
+          const mesh = new THREE.Mesh(textGeo, mat);
+          mesh.position.set(0, 10, 0);
+          scene.add(mesh);
+
+          mesh.scale.set(0, 0, 0);
+          gsap.to(mesh.scale, {
+            x: 1,
+            y: 1,
+            z: 1,
+            duration: 2,
+            ease: "elastic.out(1, 0.3)",
+          });
+        }
+      );
+
+      const balloons = [];
+      function createBalloon() {
+        const g = new THREE.Group();
+        const body = new THREE.Mesh(
+          new THREE.SphereGeometry(1.2, 30, 26),
+          new THREE.MeshStandardMaterial({
+            color: BALLOON_COLOR,
+            roughness: 0.3,
+            metalness: 0.1,
+          })
+        );
+        body.scale.y = 1.25;
+        g.add(body);
+
+        const string = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.03, 0.03, 6, 8),
+          new THREE.MeshBasicMaterial({ color: 0x333333 })
+        );
+        string.position.y = -3.3;
+        g.add(string);
+
+        g.position.set(
+          (Math.random() - 0.5) * 100,
+          Math.random() * 20,
+          (Math.random() - 0.5) * 100
+        );
+        scene.add(g);
+        balloons.push(g);
+
+        gsap.to(g.position, {
+          y: "+=30",
+          duration: 6 + Math.random() * 4,
+          ease: "sine.inOut",
+          yoyo: true,
+          repeat: -1,
+        });
+        gsap.to(g.rotation, {
+          y: Math.PI * 2,
+          duration: 8 + Math.random() * 4,
+          repeat: -1,
+          ease: "none",
+        });
+      }
+      for (let i = 0; i < BALLOON_COUNT; i++) createBalloon();
+
+      const fireflies = [];
+      const ffGeo = new THREE.SphereGeometry(0.08, 8, 8);
+      for (let i = 0; i < 100; i++) {
+        const m = new THREE.Mesh(ffGeo, new THREE.MeshBasicMaterial({ color: 0xffffff }));
+        m.position.set(
+          (Math.random() - 0.5) * 200,
+          4 + Math.random() * 30,
+          (Math.random() - 0.5) * 200
+        );
+        scene.add(m);
+        fireflies.push(m);
+
+        gsap.to(m.material, {
+          opacity: 0,
+          duration: 1 + Math.random(),
+          yoyo: true,
+          repeat: -1,
+          ease: "sine.inOut",
+        });
+      }
+
+      gsap.to("#visitBtn", {
+        y: -6,
+        duration: 1.5,
+        ease: "sine.inOut",
+        yoyo: true,
+        repeat: -1,
+      });
+
+      function animate() {
+        controls.update();
+        composer.render();
+        requestAnimationFrame(animate);
+      }
+      animate();
+
+      window.addEventListener("resize", () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        composer.setSize(window.innerWidth, window.innerHeight);
+      });
+    </script>
+  </body>
+</html>
